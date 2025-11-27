@@ -3,7 +3,7 @@ services:
     build: .
     container_name: whatif-story-engine
     ports:
-      - "3015:3000"
+      - "3015:3015"
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     volumes:

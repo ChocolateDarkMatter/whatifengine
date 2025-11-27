@@ -13,8 +13,8 @@ RUN npm install
 # Copy application code
 COPY . .
 
-# Expose port 3000
-EXPOSE 3000
+# Expose port 3015 (matches vite.config.ts)
+EXPOSE 3015
 
 # Start development server
 CMD ["npm", "run", "dev"]

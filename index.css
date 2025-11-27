@@ -498,12 +498,31 @@ header p {
 }
 
 .story-entry.interim .story-text-content {
-  opacity: 0.6;
+  /* Removed opacity - now using word-level highlighting instead */
 }
 
 .story-entry strong {
   font-weight: bold;
   color: var(--text);
+}
+
+/* Word highlighting for TTS sync */
+.story-word {
+  transition: color 0.15s ease-out, text-shadow 0.15s ease-out;
+}
+
+.story-word.spoken {
+  color: var(--text);
+}
+
+.story-word.current-word {
+  color: var(--accent-blue);
+  text-shadow: 0 0 8px var(--accent-blue);
+}
+
+/* Unspoken words in interim text are dimmed */
+.story-entry.interim .story-word:not(.spoken):not(.current-word) {
+  color: var(--gray-500);
 }
 
 .error-screen {
