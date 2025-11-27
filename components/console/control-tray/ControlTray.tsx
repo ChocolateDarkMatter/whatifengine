@@ -86,6 +86,16 @@ function ControlTray({ children }: ControlTrayProps) {
     };
   }, [connected, client, muted, audioRecorder]);
 
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (connected) {
+      setIsCollapsed(true);
+    } else {
+      setIsCollapsed(false);
+    }
+  }, [connected]);
+
   const handleMicClick = () => {
     if (isAgentSpeaking) return;
 
@@ -109,67 +119,63 @@ function ControlTray({ children }: ControlTrayProps) {
   const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
 
   return (
-    <section className="control-tray">
-      <nav className={cn('actions-nav')}>
-        <div className="mic-button-container">
-          {isTimerActive && (
-            <svg
-              key={timerKey}
-              className="countdown-timer"
-              width="60"
-              height="60"
-              viewBox="0 0 60 60"
-              style={
-                {
-                  '--timer-duration': `${responseWindowDuration}s`,
-                  '--circle-circumference': CIRCLE_CIRCUMFERENCE,
-                } as React.CSSProperties
-              }
-            >
-              <circle
-                className="countdown-timer-circle"
-                cx="30"
-                cy="30"
-                r={CIRCLE_RADIUS}
-                strokeDasharray={CIRCLE_CIRCUMFERENCE}
-              />
-            </svg>
-          )}
-          <button
-            className={cn('action-button mic-button', {
-              speaking: isAgentSpeaking,
-            })}
-            onClick={handleMicClick}
-            title={micButtonTitle}
-            disabled={isAgentSpeaking}
-            aria-disabled={isAgentSpeaking}
-          >
-            {isAgentSpeaking ? (
-              <span className="material-symbols-outlined filled">
-                voice_over_off
-              </span>
-            ) : !muted ? (
-              <span className="material-symbols-outlined filled">mic</span>
-            ) : (
-              <span className="material-symbols-outlined filled">mic_off</span>
+    <section className={cn('control-tray', { collapsed: isCollapsed })}>
+      <div className={cn('control-tray-content', { hidden: isCollapsed })}>
+        <nav className={cn('actions-nav')}>
+          <div className="mic-button-container">
+            {isTimerActive && (
+              <svg
+                key={timerKey}
+                className="countdown-timer"
+                width="60"
+                height="60"
+                viewBox="0 0 60 60"
+                style={
+                  {
+                    '--timer-duration': `${responseWindowDuration}s`,
+                    '--circle-circumference': CIRCLE_CIRCUMFERENCE,
+                  } as React.CSSProperties
+                }
+              >
+                <circle
+                  className="countdown-timer-circle"
+                  cx="30"
+                  cy="30"
+                  r={CIRCLE_RADIUS}
+                  strokeDasharray={CIRCLE_CIRCUMFERENCE}
+                />
+              </svg>
             )}
+            <button
+              className={cn('action-button mic-button', {
+                speaking: isAgentSpeaking,
+              })}
+              onClick={handleMicClick}
+              title={micButtonTitle}
+              disabled={isAgentSpeaking}
+              aria-disabled={isAgentSpeaking}
+            >
+              {isAgentSpeaking ? (
+                <span className="material-symbols-outlined filled">
+                  voice_over_off
+                </span>
+              ) : !muted ? (
+                <span className="material-symbols-outlined filled">mic</span>
+              ) : (
+                <span className="material-symbols-outlined filled">mic_off</span>
+              )}
+            </button>
+          </div>
+          <button
+            className={cn('action-button')}
+            onClick={useLogStore.getState().clearTurns}
+            aria-label="New Story"
+            title="Start a new story"
+          >
+            <span className="icon">refresh</span>
           </button>
-        </div>
-        <button
-          className={cn('action-button')}
-          onClick={useLogStore.getState().clearTurns}
-          aria-label="New Story"
-          title="Start a new story"
-        >
-          <span className="icon">refresh</span>
-        </button>
-        <AudienceSelector />
-        <StoryLevelSlider />
-        {children}
-      </nav>
-
-      <div className={cn('connection-container', { connected })}>
-        <div className="connection-button-container">
+          <AudienceSelector />
+          <StoryLevelSlider />
           <button
             ref={connectButtonRef}
             className={cn('action-button connect-toggle', { connected })}
@@ -180,9 +186,28 @@ function ControlTray({ children }: ControlTrayProps) {
               {connected ? 'pause' : 'play_arrow'}
             </span>
           </button>
-        </div>
-        <span className="text-indicator">{connected ? 'Listening...' : 'Story Time!'}</span>
+          {connected && (
+            <button
+              className={cn('action-button collapse-tray-button')}
+              onClick={() => setIsCollapsed(true)}
+              title="Hide controls"
+            >
+              <span className="material-symbols-outlined">expand_more</span>
+            </button>
+          )}
+          {children}
+        </nav>
       </div>
+
+      {isCollapsed && (
+        <button
+          className="restore-tray-button"
+          onClick={() => setIsCollapsed(false)}
+          title="Show controls"
+        >
+          <span className="material-symbols-outlined">expand_less</span>
+        </button>
+      )}
     </section>
   );
 }

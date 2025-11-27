@@ -27,13 +27,13 @@ export const useSettings = create<{
   voice: string;
   responseWindowDuration: number;
   storyLevel: number;
-  audience: 'king' | 'empress' | 'both';
+  audience: 'king' | 'empress' | 'both' | 'random';
   setSystemPrompt: (prompt: string) => void;
   setModel: (model: string) => void;
   setVoice: (voice: string) => void;
   setResponseWindowDuration: (duration: number) => void;
   setStoryLevel: (level: number) => void;
-  setAudience: (audience: 'king' | 'empress' | 'both') => void;
+  setAudience: (audience: 'king' | 'empress' | 'both' | 'random') => void;
 }>(set => ({
   systemPrompt: `You are a wise and magical storyteller for young children. Your stories are gentle adventures filled with wonder and fun characters. In your stories, you subtly teach important lessons about kindness, curiosity, and honesty. You may sparingly include elements of Haitian culture. Always be encouraging and incorporate the children's ideas into the narrative. Start with a simple story starter and prompt for their ideas with "What happens next?" or "What if...". When you describe a new scene, try to be very visual.`,
   model: DEFAULT_LIVE_API_MODEL,

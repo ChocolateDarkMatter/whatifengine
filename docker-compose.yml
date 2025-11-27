@@ -1,0 +1,13 @@
+services:
+  whatif-engine:
+    build: .
+    container_name: whatif-story-engine
+    ports:
+      - "3015:3000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    stdin_open: true
+    tty: true

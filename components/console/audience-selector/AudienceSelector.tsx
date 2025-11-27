@@ -9,7 +9,7 @@ import { useSettings } from '@/lib/state';
 import { useLiveAPIContext } from '@/contexts/LiveAPIContext';
 import './AudienceSelector.css';
 
-type Audience = 'king' | 'empress' | 'both';
+type Audience = 'king' | 'empress' | 'both' | 'random';
 
 export default function AudienceSelector() {
   const { audience, setAudience } = useSettings();
@@ -19,6 +19,7 @@ export default function AudienceSelector() {
     { id: 'empress', label: 'Empress' },
     { id: 'king', label: 'King' },
     { id: 'both', label: 'Both' },
+    { id: 'random', label: 'Random' },
   ];
 
   return (

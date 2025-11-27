@@ -65,12 +65,15 @@ export default function StreamingConsole() {
       return 'The story can be complex and nuanced, with sophisticated vocabulary and themes suitable for a child aged 10+.';
     };
 
-    const getAudienceDescription = (audience: 'king' | 'empress' | 'both'): string => {
+    const getAudienceDescription = (audience: 'king' | 'empress' | 'both' | 'random'): string => {
       if (audience === 'empress') {
         return 'The audience is a 3-year-old girl named Empress. Tailor the story for her age and address her by name.';
       }
       if (audience === 'king') {
         return 'The audience is a 4.5-year-old boy named King. Tailor the story for his age and address him by name.';
+      }
+      if (audience === 'random') {
+        return 'You are telling a story to an adult listener. There are no age restrictions or content limitations. Tell engaging, creative stories with mature themes if appropriate.';
       }
       return 'The audience is two children: King, a 4.5-year-old boy, and Empress, a 3-year-old girl. Please address both of them in the story.';
     };
@@ -104,12 +107,15 @@ export default function StreamingConsole() {
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 
-      const getCharacterDescription = (audience: 'king' | 'empress' | 'both'): string => {
+      const getCharacterDescription = (audience: 'king' | 'empress' | 'both' | 'random'): string => {
         if (audience === 'empress') {
           return 'The main character is a 3-year-old girl named Empress.';
         }
         if (audience === 'king') {
           return 'The main character is a young, brown-skinned boy with curly black hair named King.';
+        }
+        if (audience === 'random') {
+          return 'Create characters appropriate to the story being told.';
         }
         return 'The main characters are King, a young, brown-skinned boy with curly black hair, and Empress, a 3-year-old girl.';
       };
@@ -123,21 +129,51 @@ export default function StreamingConsole() {
       const imagePrompt = imagePromptResponse.text;
 
       if (imagePrompt) {
-        // Step 2: Generate the image
-        const imageResponse = await ai.models.generateImages({
-          model: 'imagen-4.0-generate-001',
-          prompt: imagePrompt,
-          config: {
-            numberOfImages: 1,
-            outputMimeType: 'image/png',
-            aspectRatio: '1:1',
-          },
-        });
+        // Step 2: Generate the image with fallback models
+        const imageModels = [
+          'imagen-4.0-ultra-generate-preview-06-06', // Ultra quality (separate quota)
+          'imagen-4.0-generate-preview-06-06',       // Standard quality
+          'imagen-4.0-generate-001',                 // Legacy fallback
+        ];
 
-        if (imageResponse.generatedImages && imageResponse.generatedImages.length > 0) {
-          const base64ImageBytes = imageResponse.generatedImages[0].image.imageBytes;
-          const dataUrl = `data:image/png;base64,${base64ImageBytes}`;
-          setImageUrl(dataUrl);
+        let imageResponse = null;
+        let lastError = null;
+
+        for (const model of imageModels) {
+          try {
+            imageResponse = await ai.models.generateImages({
+              model,
+              prompt: imagePrompt,
+              config: {
+                numberOfImages: 1,
+                outputMimeType: 'image/png',
+                aspectRatio: '1:1',
+              },
+            });
+
+            if (imageResponse.generatedImages && imageResponse.generatedImages.length > 0) {
+              const base64ImageBytes = imageResponse.generatedImages[0].image.imageBytes;
+              const dataUrl = `data:image/png;base64,${base64ImageBytes}`;
+              setImageUrl(dataUrl);
+              break; // Success, exit the loop
+            }
+          } catch (err: any) {
+            lastError = err;
+            console.warn(`Failed to generate image with model ${model}:`, err.message);
+
+            // Continue to next model if quota exhausted or model not found
+            if (err.message?.includes('quota') ||
+              err.message?.includes('RESOURCE_EXHAUSTED') ||
+              err.message?.includes('not found')) {
+              continue;
+            }
+            // For other errors, break the loop
+            break;
+          }
+        }
+
+        if (!imageResponse && lastError) {
+          console.error('All image generation models failed:', lastError);
         }
       }
     } catch (error) {
@@ -227,9 +263,32 @@ export default function StreamingConsole() {
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTo({
+            top: scrollRef.current.scrollHeight,
+            behavior: 'smooth'
+          });
+        }
+      });
     }
   }, [turns]);
+
+  // Additional scroll trigger for when text content changes
+  useEffect(() => {
+    const lastTurn = turns[turns.length - 1];
+    if (lastTurn && scrollRef.current) {
+      requestAnimationFrame(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTo({
+            top: scrollRef.current.scrollHeight,
+            behavior: 'smooth'
+          });
+        }
+      });
+    }
+  }, [turns.length > 0 ? turns[turns.length - 1]?.text : '']);
 
   const lastAgentTurnText = turns.filter(t => t.role === 'agent' && t.isFinal).pop()?.text || 'A beautiful illustration for our story.';
 
@@ -241,6 +300,8 @@ export default function StreamingConsole() {
         return 'King:';
       case 'both':
         return 'King & Empress:';
+      case 'random':
+        return 'Listener:';
     }
   };
 
@@ -252,7 +313,11 @@ export default function StreamingConsole() {
       ) : (
         <>
           <div className="story-image-container">
-            {isGeneratingImage && <div className="image-loader">Creating an illustration...</div>}
+            {isGeneratingImage && (
+              <div className="image-loader-icon">
+                <span className="icon">brush</span>
+              </div>
+            )}
             {imageUrl && <img src={imageUrl} alt={lastAgentTurnText} className="story-image" />}
             {!imageUrl && !isGeneratingImage && <div className="image-placeholder"><span className="icon">palette</span></div>}
           </div>
