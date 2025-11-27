@@ -1,0 +1,7 @@
+{
+  "name": "Tiny 'What If?' Story Engine",
+  "description": "An endless, interactive storytelling adventure. The AI starts a simple story, and at key moments, it stops and asks 'What if...?'. Your verbal responses directly shape the plot, characters, and outcome. The audiance is a 3 year old girl named Empress.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

@@ -1,0 +1,34 @@
+
+.audience-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--Neutral-15);
+  padding: 4px;
+  border-radius: 14px;
+}
+
+.audience-selector button {
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--Neutral-60);
+  transition: all 0.2s ease-in-out;
+  border: 1px solid transparent;
+}
+
+.audience-selector button.active {
+  background-color: var(--Blue-800);
+  color: var(--Blue-400);
+  border-color: var(--Blue-500);
+}
+
+.audience-selector button:not(.active):not(:disabled):hover {
+  background-color: var(--Neutral-20);
+  color: var(--Neutral-80);
+}
+
+.audience-selector button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
