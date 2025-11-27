@@ -69,7 +69,16 @@ export function useLiveApi({
           });
       });
     }
-  }, [audioStreamerRef]);
+
+    // Cleanup on unmount
+    return () => {
+      if (audioStreamerRef.current) {
+        audioStreamerRef.current.stop();
+        audioStreamerRef.current = null;
+      }
+      client.disconnect();
+    };
+  }, [audioStreamerRef, client]);
 
   useEffect(() => {
     const onOpen = () => {
@@ -104,8 +113,11 @@ export function useLiveApi({
   }, [client]);
 
   const connect = useCallback(async () => {
-    if (!config) {
+    if (!config || Object.keys(config).length === 0) {
       throw new Error('config has not been set');
+    }
+    if (!config.responseModalities || !config.systemInstruction) {
+      throw new Error('config is missing required fields: responseModalities and systemInstruction');
     }
     client.disconnect();
     if (audioStreamerRef.current) {

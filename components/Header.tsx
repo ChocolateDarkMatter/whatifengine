@@ -16,6 +16,10 @@ export default function Header() {
         return 'King';
       case 'both':
         return 'King & Empress';
+      case 'random':
+        return 'Listener';
+      default:
+        return 'Friend';
     }
   };
 

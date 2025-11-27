@@ -19,6 +19,10 @@ const WelcomeScreen: React.FC = () => {
         return 'King';
       case 'both':
         return 'King and Empress';
+      case 'random':
+        return 'Listener';
+      default:
+        return 'Friend';
     }
   };
 

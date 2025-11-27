@@ -295,6 +295,8 @@ header p {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: visible;
+  padding: 8px;
 }
 
 .countdown-timer {
@@ -383,6 +385,7 @@ header p {
   border: 1px solid var(--Neutral-30);
   background: var(--Neutral-5);
   padding: 10px;
+  overflow: visible;
 }
 
 .control-tray .connection-container .text-indicator {
